@@ -9,7 +9,7 @@ app.use(cors());
 app.use(express.json());
 
 
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.cckud.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -36,7 +36,7 @@ async function run() {
         })
 
         // Store user to the database
-        app.post('/users', async (req, res) => {
+        app.post('/users/email', async (req, res) => {
             const user = req.body;
             const result = await usersCollection.insertOne(user);
             res.send(result);
@@ -49,9 +49,26 @@ async function run() {
             res.send(result);
         })
 
-        // // Get All Task
+        // Get All Task
         app.get('/all-task', async (req, res) => {
             const result = await tasksCollection.find().toArray();
+            res.send(result);
+        })
+
+        // Specific Users All Tasks
+        app.get('/all-task/:email', async (req, res) => {
+            const email = req.params.email;
+            const query = { userEmail: email };
+
+            const result = await tasksCollection.find(query).toArray();
+            res.send(result);
+        });
+
+        // Delete a task
+        app.delete('/all-task/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) }
+            const result = await tasksCollection.deleteOne(query);
             res.send(result);
         })
 
